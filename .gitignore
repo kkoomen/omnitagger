@@ -1,0 +1,17 @@
+# base
+*.swp
+*.swo
+*.zip
+.DS_Store
+
+# standard python excludes
+__pycache__/
+
+# packaging / distributing
+*.egg-info
+*.egg
+*.pyc
+build/
+dist/
+
+#vim: ft=dosini
