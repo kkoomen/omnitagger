@@ -7,8 +7,8 @@
 # Distributed under terms of the MIT license.
 
 """
-Beautify your (old) music files. Metatags are automatically
-inserted based on filename.
+A CLI that beautifies your (old) music files and automatically adds metatags
+based on the filename.
 """
 
 __version__ = '0.0.1'

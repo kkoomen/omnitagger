@@ -3,6 +3,8 @@
 *.swo
 *.zip
 .DS_Store
+.idea
+.todo
 
 # standard python excludes
 __pycache__/
