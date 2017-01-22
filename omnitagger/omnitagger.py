@@ -21,7 +21,7 @@ class OmniTagger:
 
     def __init__(self):
         self.destination = 'ot'
-        self.exceptions = ['ZZ Top', 'TNT', 'xKito', 'ACDC']
+        self.exceptions = ['ZZ Top', 'TNT', 'ACDC']
         self.recursive = True
         self.titlecase_articles = True
         self.allowed_extensions = ['.mp3'] or ['.mp3', '.ogg', '.flac']
@@ -164,7 +164,7 @@ class OmniTagger:
             filepart = titlecase(filepart.lower(), callback=self.titlecase_handler)
 
         formatted = ' '.join(
-            [w for w in filepart.split(' ') if w]
+            [w for w in re.sub(r'\_+', ' ', filepart).split(' ') if w]
         )
         return formatted
 
