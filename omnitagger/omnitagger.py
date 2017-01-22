@@ -12,12 +12,17 @@ TODO
 
 import os
 import re
+import logging
+from titlecase import titlecase
+from shutil import copyfile
+from omnitagger.metatagger import tagger
 
 class OmniTagger:
 
     def __init__(self):
-        self.destination = '{}/omnitagger'.format(os.getcwd())
+        self.destination = 'ot'
         self.recursive = True
+        self.titlecase_articles = True
         self.allowed_extensions = ('.mp3', '.ogg', '.flac')
 
     def get_files(self):
@@ -29,15 +34,16 @@ class OmniTagger:
                         cwd = root.replace(os.getcwd(), '')
                         dirname = cwd[1::].split('/', 1)[0]
                         if dirname != self.destination:
-                            file = os.path.join(cwd[1::], filename)
+                            file = os.path.join(os.getcwd(), filename)
                             files.append(file)
         else:
             for file in os.listdir(os.getcwd()):
                 if file.endswith(self.allowed_extensions or ('.mp3', '.ogg', '.flac')):
-                    files.append(file)
+                    files.append(os.path.realpath(file))
 
         if len(files) < 1:
-            exit('No mp3/ogg/flac-files found in your current working directory.')
+            logging.error('No mp3/ogg/flac-files found in your current working directory.')
+            exit(1)
         else:
             return sorted(files)
 
@@ -98,28 +104,89 @@ class OmniTagger:
         pattern += '$'
         return pattern
 
+    def find_artist(self, filename):
+        """
+        If we don't have an artist, then check if it is in the
+        metadata already. Otherwise we prompt the user if the artist
+        is the name of the current folder, which is a common case
+        when you download an album.
+        """
+        artist = None
+        metadata = tagger.read(filename)
+
+        if metadata and metadata['artist']:
+            artist = self.beautify(metadata['artist'])
+        else:
+            _, current_dir = os.getcwd().rsplit('/', 1)
+            question = "Unable to find artist in filename or metadata for \"{}\". \n"
+            question += "Is the current directory ({}) perhaps the "
+            question += "exact artist name? [Y/n] "
+            question = question.format(filename, current_dir)
+            answer = input(question)
+            while answer.lower() not in 'yn':
+                print('Please enter Y or n.')
+            if answer.lower() == 'n':
+                artist = self.beautify(input("Enter a new artist name: "))
+            if answer == 'y':
+                artist = self.beautify(current_dir)
+
+        if not artist:
+            logging.error('Unable to find artist for file "{}", skipping.'.format(filename))
+        return artist
+
+    def titlecase_handler(self, word, **kwargs):
+        # Taken from
+        # https://github.com/ppannuto/python-titlecase/blob/master/titlecase/__init__.py#L15
+        articles = ['a','an','and','as','at','but','by','en','for','if','in',
+                    'of','on','or','the','to','v','v.','via','vs','vs.']
+        if self.titlecase_articles and word.lower() in articles:
+            return word.title()
+
     def beautify(self, filepart):
-        if filepart is None:
-            return
+        if not filepart:
+            return False
+        elif isinstance(filepart, list):
+            filepart = filepart[0]
+
+        titlecased_filepart = titlecase(filepart.lower(), callback=self.titlecase_handler)
 
         formatted = ' '.join(
-            [w for w in filepart.title().split(' ') if w]
+            [w for w in titlecased_filepart.split(' ') if w]
         )
         return formatted
 
     def main(self):
         files = self.get_files()
-        for filename in files:
+        for index,file in enumerate(files):
             try:
+                filepath, filename = file.rsplit('/', 1)
+                valid_file = tagger.is_valid_audio_file(filename)
+                if valid_file is False:
+                    continue
+
                 pattern = self.get_filename_pattern()
                 regex = re.match(pattern, filename)
 
-                artist = self.beautify(regex.group(1))
+                artist = self.beautify(regex.group(1)) or self.beautify(self.find_artist(filename))
                 title = self.beautify(regex.group(2))
                 extension = regex.group(3)
-                print('{} - {}.{}'.format(artist, title, extension))
+
+                # copy the file under its new name
+                dest_folder = os.path.join(filepath, self.destination)
+                dest_filename = '{} - {}.{}'.format(artist, title, extension)
+                dest_file = '{}/{}'.format(dest_folder, dest_filename)
+                copyfile(file, dest_file)
+
+                filedata = {
+                    'filename': dest_file,
+                    'artist': artist,
+                    'title': title,
+                    'extension': extension
+                }
+                tagger.write(filedata)
+                logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
             except AttributeError as e:
-                print("\"{}\" does not match the pattern".format(filename))
+                logging.error("\"{}\" does not match the pattern".format(filename))
                 continue
 
 

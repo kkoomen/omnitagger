@@ -1,1 +1,4 @@
 prettytable==0.7.2
+mutagen==1.36
+logger==1.4
+titlecase==0.8.1

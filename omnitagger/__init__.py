@@ -8,7 +8,7 @@
 
 """
 A CLI that beautifies your (old) music files and automatically adds metatags
-based on the filename.
+based on the filename and metadata.
 """
 
 __version__ = '0.0.1'
@@ -19,11 +19,10 @@ __license__ = 'MIT'
 
 
 import logging
+import os
 
-module_name = __name__.split('.')[0]
-log_format = '[{}] [%(levelname)s] %(message)s'.format(module_name)
+log_format = '[%(levelname)s] %(message)s'
+logging.basicConfig(format=log_format, level=logging.INFO)
 
-console = logging.StreamHandler()
-console.setFormatter(logging.Formatter(log_format))
-
-logging.getLogger('').addHandler(console)
+if not os.path.exists('ot'):
+    os.makedirs('ot')
