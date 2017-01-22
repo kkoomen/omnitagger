@@ -16,3 +16,14 @@ __author__ = 'Kim Koomen'
 __email__ = 'koomen@protonmail.com'
 __url__ = 'https://github.com/muts/omni-tagger'
 __license__ = 'MIT'
+
+
+import logging
+
+module_name = __name__.split('.')[0]
+log_format = '[{}] [%(levelname)s] %(message)s'.format(module_name)
+
+console = logging.StreamHandler()
+console.setFormatter(logging.Formatter(log_format))
+
+logging.getLogger('').addHandler(console)
