@@ -69,10 +69,11 @@ class Tagger:
             audio = MP3(file['filename'], ID3=EasyID3)
             try:
                 audio.add_tags(ID3=EasyID3)
-                if kwargs['clear']:
-                    audio.clear()
-            except (mutagen.id3.error, KeyError):
+            except (mutagen.id3.error, KeyError) as e:
                 pass
+
+            if kwargs['clear']:
+                audio.clear()
             audio['title'] = file['title']
             audio['artist'] = file['artist']
             audio.save()
@@ -80,22 +81,22 @@ class Tagger:
         elif file['extension'] == 'flac':
             try:
                 audio = FLAC(file['filename'])
-                if kwargs['clear']:
-                    audio.clear()
             except (FLACNoHeaderError, KeyError):
                 audio = FLAC()
 
+            if kwargs['clear']:
+                audio.clear()
             audio['TITLE'] = file['title']
             audio['ARTIST'] = file['artist']
             audio.save(file['filename'])
         elif file['extension'] == 'ogg':
             try:
                 audio = OggVorbis(file['filename'])
-                if kwargs['clear']:
-                    audio.clear()
             except (OggVorbisHeaderError, KeyError):
                 audio = OggVorbis()
 
+            if kwargs['clear']:
+                audio.clear()
             audio['title'] = file['artist']
             audio['artist'] = file['artist']
             audio['ALBUMARTIST'] = file['artist']
