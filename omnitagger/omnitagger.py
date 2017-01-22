@@ -20,7 +20,7 @@ from omnitagger.metatagger import tagger
 class OmniTagger:
 
     def __init__(self, args):
-        self.destination = 'ot'
+        self.destination = __name__.split('.', 1)[0]
         self.exceptions = args.exceptions or []
         self.recursive = args.recursive
         self.titlecase_articles = True
@@ -46,7 +46,7 @@ class OmniTagger:
 
         if len(files) < 1:
             logging.error('No {} files found in your current directory.'.format(
-                '/'.join(self.allowed_extensions).replace('.', '').upper()
+                '/'.join(self.filetypes).replace('.', '').upper()
             ))
             exit(1)
         else:

@@ -44,11 +44,11 @@ setup(
     scripts=['bin/omni-tagger'],
     keywords=['music', 'beautifier', 'mp3', 'ogg', 'flac', 'local', 'tagger'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Environment :: Console',
-        'Operating System :: OS Independent',
+        'Operating System :: POSIX',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.1',
         'Programming Language :: Python :: 3.2',
