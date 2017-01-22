@@ -2,6 +2,11 @@
 
 Soon available via pypi.
 
+# Installation
+- `$ git clone https://github.com/muts/omnitagger`
+- `$ cd omnitagger`
+- `$ ./setup.py install`
+
 # Documentation
 Visit the [documentation](https://github.com/muts/omnitagger/wiki/Documentation)
 on the wiki for further details on how to use OmniTagger.
