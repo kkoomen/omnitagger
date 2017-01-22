@@ -7,7 +7,7 @@
 # Distributed under terms of the MIT license.
 
 """
-TODO
+This file contains the tagger that reads/writes to a file.
 """
 
 
@@ -23,6 +23,14 @@ import logging
 class Tagger:
 
     def is_valid_audio_file(self, filepath):
+        """
+        Check if a file is valid by putting in through mutagen.
+        A file isn't an audio file of mutagen throws an header error
+
+        :param filepath: the absolute path of the file to check on
+        :returns: the audio file containing the metadata
+        :rtype: Boolean/Class
+        """
         _, filename = filepath.rsplit('/', 1)
         _, ext = filename.rsplit('.', 1)
         try:
@@ -39,6 +47,13 @@ class Tagger:
         return False
 
     def read(self, filepath):
+        """
+        A wrapper around the is_valid_audio_file -function.
+
+        :param filepath: the absolute path of the file to check on
+        :returns: the audio file containing the metadata
+        :rtype: Boolean/Class
+        """
         metadata = self.is_valid_audio_file(filepath)
         return metadata
 

@@ -7,7 +7,7 @@
 # Distributed under terms of the MIT license.
 
 """
-TODO
+Contains the main logic for getting the files, beautify them, and log the info.
 """
 
 import os
@@ -20,7 +20,8 @@ from omnitagger.metatagger import tagger
 class OmniTagger:
 
     def __init__(self, args):
-        self.destination = __name__.split('.', 1)[0]
+        self.package_name = __name__.split('.', 1)[0]
+        self.destination = self.package_name
         self.exceptions = args.exceptions or []
         self.recursive = args.recursive
         self.titlecase_articles = True
@@ -29,6 +30,11 @@ class OmniTagger:
         self.filetypes = args.filetypes or ['.mp3', '.ogg', '.flac']
 
     def get_files(self):
+        """
+        Get audio files of type mp3/ogg/flac recursively or non-recursively.
+
+        :rtype: list
+        """
         files = []
         if self.recursive:
             for root, dirnames, filenames in os.walk(os.getcwd()):
@@ -55,6 +61,8 @@ class OmniTagger:
     def get_filename_pattern(self):
         """
         The filename should start with this pattern
+
+        :rtype: string
         """
         pattern = '^'
 
@@ -115,6 +123,9 @@ class OmniTagger:
         metadata already. Otherwise we prompt the user if the artist
         is the name of the current folder, which is a common case
         when you download an album.
+
+        :param filepath: the absolute path of the file to look for the artist.
+        :rtype: None/String
         """
         artist = None
         metadata = tagger.read(filepath)
@@ -143,6 +154,15 @@ class OmniTagger:
         return artist
 
     def titlecase_handler(self, word, **kwargs):
+        """
+        This function gets called for every word that is being titlecased.
+        We will titlecase articles if the user adds the flag.
+        If we don't return anything then it will be titlecased by the
+        "titlecase" module itself.
+
+        :param word: the word to check on
+        :rtype: None/String
+        """
         # Taken from
         # https://github.com/ppannuto/python-titlecase/blob/master/titlecase/__init__.py#L15
         articles = ['a','an','and','as','at','but','by','en','for','if','in',
@@ -171,6 +191,10 @@ class OmniTagger:
         return formatted
 
     def main(self):
+        """
+        The main function that loops over all the files, beautifies them, adds
+        metadata and copies them to their new location.
+        """
         files = self.get_files()
         for index,file in enumerate(files):
             try:
@@ -186,6 +210,7 @@ class OmniTagger:
                 title = self.beautify(regex.group(2))
                 extension = regex.group(3)
 
+                # If we don't have an artist, we will continue.
                 if not artist:
                     continue
 
@@ -195,7 +220,7 @@ class OmniTagger:
                 dest_file = '{}/{}'.format(dest_folder, dest_filename)
                 copyfile(file, dest_file)
 
-                # write the metadata
+                # write the metadata to the new file
                 filedata = {
                     'filename': dest_file,
                     'artist': artist,
@@ -208,6 +233,9 @@ class OmniTagger:
                     os.remove(file)
 
                 logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
-            except AttributeError as e:
+            except AttributeError:
                 logging.error("\"{}\" does not match the pattern".format(filename))
                 continue
+            except KeyboardInterrupt:
+                logging.error('Quitting {}'.format(self.package_name))
+                exit(1)
