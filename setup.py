@@ -7,7 +7,7 @@
 # Distributed under terms of the MIT license.
 
 """
-Setuptools for omni-tagger.
+Setuptools for omnitagger.
 """
 
 from setuptools import setup
@@ -24,7 +24,7 @@ with open('requirements.txt') as requirements:
     REQUIREMENTS = requirements.readlines()
 
 with open('README.md') as readme:
-    LONG_DESCRIPTION = readme.readlines()
+    LONG_DESCRIPTION = readme.read()
 
 setup(
     name='OmniTagger',
@@ -44,12 +44,12 @@ setup(
     scripts=['bin/omni-tagger'],
     keywords=['music', 'beautifier', 'mp3', 'ogg', 'flac', 'local', 'tagger'],
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.0',
         'Programming Language :: Python :: 3.1',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',

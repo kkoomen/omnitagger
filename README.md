@@ -3,7 +3,7 @@
 Soon available via pypi.
 
 # Documentation
-Visit the [documentation](https://github.com/muts/omni-tagger/wiki/Documentation)
+Visit the [documentation](https://github.com/muts/omnitagger/wiki/Documentation)
 on the wiki for further details on how to use OmniTagger.
 
 # The purpose of OmniTagger
