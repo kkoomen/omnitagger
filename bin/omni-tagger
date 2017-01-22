@@ -10,7 +10,16 @@
 TODO
 """
 
-from omnitagger.omnitagger import omnitagger
-
+from omnitagger.omnitagger import OmniTagger
+import argparse
 if __name__ == '__main__':
-    omnitagger.main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', '--exceptions', default=False, nargs='+', help='enter full artist or file names that you don\'t want to be title cased', required=False)
+    parser.add_argument('-r', '--recursive', action='store_true', default=False, help='grab files recursively', required=False)
+    parser.add_argument('-c', '--clear', action='store_true', default=False, help='clear all existing metadata on all files before inserting new ones', required=False)
+    parser.add_argument('-f', '--filetypes', default=False, nargs='+', help='enter filetype(s) the script should only look for (.mp3/.flac/.ogg)', required=False)
+    parser.add_argument('--remove-original', action='store_true', default=False, help='removes the original file after running', required=False)
+    parser.add_argument('--titlecase-articles', action='store_true', default=False, help='titlecase articles such as: a, an, and, as, that etc..', required=False)
+    args = parser.parse_args()
+
+    OmniTagger(args).main()

@@ -19,19 +19,21 @@ from omnitagger.metatagger import tagger
 
 class OmniTagger:
 
-    def __init__(self):
+    def __init__(self, args):
         self.destination = 'ot'
-        self.exceptions = ['ZZ Top', 'TNT', 'ACDC']
-        self.recursive = True
+        self.exceptions = args.exceptions or []
+        self.recursive = args.recursive
         self.titlecase_articles = True
-        self.allowed_extensions = ['.mp3'] or ['.mp3', '.ogg', '.flac']
+        self.clear = args.clear
+        self.remove_original = args.remove_original
+        self.filetypes = args.filetypes or ['.mp3', '.ogg', '.flac']
 
     def get_files(self):
         files = []
         if self.recursive:
             for root, dirnames, filenames in os.walk(os.getcwd()):
                 for filename in filenames:
-                    if filename.endswith(tuple(self.allowed_extensions)):
+                    if filename.endswith(tuple(self.filetypes)):
                         cwd = root.replace(os.getcwd(), '')
                         dirname = cwd[1::].split('/', 1)[0]
                         if dirname != self.destination:
@@ -39,7 +41,7 @@ class OmniTagger:
                             files.append(file)
         else:
             for file in os.listdir(os.getcwd()):
-                if file.endswith(tuple(self.allowed_extensions)):
+                if file.endswith(tuple(self.filetypes)):
                     files.append(os.path.realpath(file))
 
         if len(files) < 1:
@@ -200,14 +202,12 @@ class OmniTagger:
                     'title': title,
                     'extension': extension
                 }
-                tagger.write(filedata)
+                tagger.write(filedata, clear=self.clear)
+
+                if self.remove_original:
+                    os.remove(file)
 
                 logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
             except AttributeError as e:
                 logging.error("\"{}\" does not match the pattern".format(filename))
                 continue
-
-
-
-
-omnitagger = OmniTagger()
