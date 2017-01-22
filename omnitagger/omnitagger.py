@@ -21,28 +21,31 @@ class OmniTagger:
 
     def __init__(self):
         self.destination = 'ot'
+        self.exceptions = ['ZZ Top', 'TNT', 'xKito', 'ACDC']
         self.recursive = True
         self.titlecase_articles = True
-        self.allowed_extensions = ('.mp3', '.ogg', '.flac')
+        self.allowed_extensions = ['.mp3'] or ['.mp3', '.ogg', '.flac']
 
     def get_files(self):
         files = []
         if self.recursive:
             for root, dirnames, filenames in os.walk(os.getcwd()):
                 for filename in filenames:
-                    if filename.endswith(self.allowed_extensions or ('.mp3', '.ogg', '.flac')):
+                    if filename.endswith(tuple(self.allowed_extensions)):
                         cwd = root.replace(os.getcwd(), '')
                         dirname = cwd[1::].split('/', 1)[0]
                         if dirname != self.destination:
-                            file = os.path.join(os.getcwd(), filename)
+                            file = os.path.join(root, filename)
                             files.append(file)
         else:
             for file in os.listdir(os.getcwd()):
-                if file.endswith(self.allowed_extensions or ('.mp3', '.ogg', '.flac')):
+                if file.endswith(tuple(self.allowed_extensions)):
                     files.append(os.path.realpath(file))
 
         if len(files) < 1:
-            logging.error('No mp3/ogg/flac-files found in your current working directory.')
+            logging.error('No {} files found in your current directory.'.format(
+                '/'.join(self.allowed_extensions).replace('.', '').upper()
+            ))
             exit(1)
         else:
             return sorted(files)
@@ -104,7 +107,7 @@ class OmniTagger:
         pattern += '$'
         return pattern
 
-    def find_artist(self, filename):
+    def find_artist(self, filepath):
         """
         If we don't have an artist, then check if it is in the
         metadata already. Otherwise we prompt the user if the artist
@@ -112,26 +115,29 @@ class OmniTagger:
         when you download an album.
         """
         artist = None
-        metadata = tagger.read(filename)
+        metadata = tagger.read(filepath)
 
         if metadata and metadata['artist']:
             artist = self.beautify(metadata['artist'])
         else:
-            _, current_dir = os.getcwd().rsplit('/', 1)
-            question = "Unable to find artist in filename or metadata for \"{}\". \n"
-            question += "Is the current directory ({}) perhaps the "
-            question += "exact artist name? [Y/n] "
+            _, current_dir, filename  = filepath.rsplit('/', 2)
+            question = "Unable to find artist in filename or metadata for \"{}\". "
+            question += "\nIs the directory name ({}) perhaps the "
+            question += "exact artist name? [Y/n]: "
             question = question.format(filename, current_dir)
             answer = input(question)
-            while answer.lower() not in 'yn':
-                print('Please enter Y or n.')
+            while not answer or answer.lower() not in 'yn':
+                answer = input('Please enter Y or n. ')
+
             if answer.lower() == 'n':
-                artist = self.beautify(input("Enter a new artist name: "))
+                artist = input("Enter a new artist name: ")
             if answer == 'y':
-                artist = self.beautify(current_dir)
+                artist = current_dir
 
         if not artist:
-            logging.error('Unable to find artist for file "{}", skipping.'.format(filename))
+            logging.error('Unable to find artist for file "{}", skipping.'.format(
+                filename
+            ))
         return artist
 
     def titlecase_handler(self, word, **kwargs):
@@ -143,15 +149,22 @@ class OmniTagger:
             return word.title()
 
     def beautify(self, filepart):
+        """
+        Beautifies a part of a file.
+
+        :param filepart: a string that can be the title or artist
+        :rtype: string
+        """
         if not filepart:
             return False
         elif isinstance(filepart, list):
             filepart = filepart[0]
 
-        titlecased_filepart = titlecase(filepart.lower(), callback=self.titlecase_handler)
+        if filepart.strip() not in self.exceptions:
+            filepart = titlecase(filepart.lower(), callback=self.titlecase_handler)
 
         formatted = ' '.join(
-            [w for w in titlecased_filepart.split(' ') if w]
+            [w for w in filepart.split(' ') if w]
         )
         return formatted
 
@@ -160,23 +173,27 @@ class OmniTagger:
         for index,file in enumerate(files):
             try:
                 filepath, filename = file.rsplit('/', 1)
-                valid_file = tagger.is_valid_audio_file(filename)
+                valid_file = tagger.is_valid_audio_file(file)
                 if valid_file is False:
                     continue
 
                 pattern = self.get_filename_pattern()
                 regex = re.match(pattern, filename)
 
-                artist = self.beautify(regex.group(1)) or self.beautify(self.find_artist(filename))
+                artist = self.beautify(regex.group(1) or self.find_artist(file))
                 title = self.beautify(regex.group(2))
                 extension = regex.group(3)
 
+                if not artist:
+                    continue
+
                 # copy the file under its new name
-                dest_folder = os.path.join(filepath, self.destination)
+                dest_folder = os.path.join(os.getcwd(), self.destination)
                 dest_filename = '{} - {}.{}'.format(artist, title, extension)
                 dest_file = '{}/{}'.format(dest_folder, dest_filename)
                 copyfile(file, dest_file)
 
+                # write the metadata
                 filedata = {
                     'filename': dest_file,
                     'artist': artist,
@@ -184,6 +201,7 @@ class OmniTagger:
                     'extension': extension
                 }
                 tagger.write(filedata)
+
                 logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
             except AttributeError as e:
                 logging.error("\"{}\" does not match the pattern".format(filename))

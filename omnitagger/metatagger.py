@@ -22,23 +22,24 @@ import logging
 
 class Tagger:
 
-    def is_valid_audio_file(self, filename):
+    def is_valid_audio_file(self, filepath):
+        _, filename = filepath.rsplit('/', 1)
         _, ext = filename.rsplit('.', 1)
         try:
             if ext == 'mp3':
-                audio = MP3(filename, ID3=EasyID3)
+                audio = MP3(filepath, ID3=EasyID3)
             elif ext == 'flac':
-                audio = FLAC(filename)
+                audio = FLAC(filepath)
             elif ext == 'ogg':
-                audio = OggVorbis(filename)
+                audio = OggVorbis(filepath)
             return audio
         except (HeaderNotFoundError, FLACNoHeaderError, OggVorbisHeaderError):
             logging.error('"{}" is not a valid audio file.'.format(filename))
 
         return False
 
-    def read(self, filename):
-        metadata = self.is_valid_audio_file(filename)
+    def read(self, filepath):
+        metadata = self.is_valid_audio_file(filepath)
         return metadata
 
 
