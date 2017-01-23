@@ -41,7 +41,7 @@ setup(
     package_dir={'omnitagger': 'omnitagger'},
     install_requires=REQUIREMENTS,
     license=LICENSE,
-    scripts=['bin/omni-tagger'],
+    scripts=['bin/omnitagger'],
     keywords=['music', 'beautifier', 'mp3', 'ogg', 'flac', 'local', 'tagger'],
     classifiers=[
         'Intended Audience :: Developers',
