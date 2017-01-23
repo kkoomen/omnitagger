@@ -24,7 +24,7 @@ class OmniTagger:
         self.destination = self.package_name
         self.exceptions = args.exceptions or []
         self.recursive = args.recursive
-        self.titlecase_articles = True
+        self.titlecase_articles = args.titlecase_articles
         self.clear = args.clear
         self.remove_original = args.remove_original
         self.filetypes = args.filetypes or ['.mp3', '.ogg', '.flac']
