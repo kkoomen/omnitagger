@@ -2,7 +2,7 @@
 
 Soon available via pypi.
 
-Omnitagger is a CLI tool for beautifying your files and adding metadata
+Omnitagger is a CLI tool for beautifying your music files and adding metadata
 automatically to your files. It provides fingerprint lookup via
 [acoustid](https://github.com/beetbox/pyacoustid). Wether this is specified or
 not: after that it will check for the `artist - title.{mp3,flac,ogg}` format.
