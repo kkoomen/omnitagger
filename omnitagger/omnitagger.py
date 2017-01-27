@@ -138,8 +138,8 @@ class OmniTagger:
             artist = metadata['artist']
         else:
             _, current_dir, filename  = filepath.rsplit('/', 2)
-            question = "Unable to find artist via fingerprint, in the filename "
-            question += "and metadata for \"{}\". "
+            question = "Unable to find artist via fingerprint, filename "
+            question += "or metadata for \"{}\". "
             question += "\nIs the directory name ({}) perhaps the "
             question += "exact artist name? [Y/n]: "
             question = question.format(filename, current_dir)
