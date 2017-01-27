@@ -1,4 +1,4 @@
-# OmniTagger
+# omnitagger
 
 Soon available via pypi.
 
@@ -9,10 +9,10 @@ Soon available via pypi.
 
 # Documentation
 Visit the [documentation](https://github.com/muts/omnitagger/wiki/Documentation)
-on the wiki for further details on how to use OmniTagger.
+on the wiki for further details on how to use omnitagger.
 
-# The purpose of OmniTagger
-The purpose of Mubu was a personal issue we all can relate to in the early days:
+# The purpose of omnitagger
+The purpose of  was a personal issue we all can relate to in the early days:
 You download an album or song using a YouTube converter
 (or oldschool Limewire/Frostwire back in those days) and the names do look
 horrible. Names with numbers in front of it while it is already in the metatags,
