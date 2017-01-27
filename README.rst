@@ -13,7 +13,7 @@ case that when you download an album, the structure is:
 
 ::
 
-    arist-name/
+    artist-name/
     ├── title.mp3
     ├── title.mp3
     ├── title.mp3

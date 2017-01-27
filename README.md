@@ -10,7 +10,7 @@ If that pattern isn't found either, it will check the directory the file is in,
 since it is a common case that when you download an album, the structure is:
 
 ```
-arist-name/
+artist-name/
 ├── title.mp3
 ├── title.mp3
 ├── title.mp3
