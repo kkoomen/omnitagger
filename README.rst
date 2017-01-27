@@ -3,6 +3,27 @@ omnitagger
 
 Soon available via pypi.
 
+Omnitagger is a CLI tool for beautifying your files and adding metadata
+automatically to your files. It provides fingerprint lookup via
+`acoustid <https://github.com/beetbox/pyacoustid>`__. Wether this is
+specified or not: after that it will check for the
+``artist - title.{mp3,flac,ogg}`` format. If that pattern isn't found
+either, it will check the directory the file is in, since it is a common
+case that when you download an album, the structure is:
+
+::
+
+    arist-name/
+    ├── title.mp3
+    ├── title.mp3
+    ├── title.mp3
+    └── title.mp3
+
+If that isn't an options either, it will skip the file and continue to
+the next one. For more information on how omnitagger works, visit the
+`How it works <https://github.com/muts/omnitagger/wiki/How-it-works>`__
+page on the wiki.
+
 Installation
 ============
 
