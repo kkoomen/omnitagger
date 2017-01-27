@@ -24,6 +24,9 @@ import os
 log_format = '[%(levelname)s] %(message)s'
 logging.basicConfig(format=log_format, level=logging.INFO)
 
+for logger_name in ['requests']:
+    logging.getLogger(logger_name).propagate = False
+
 package_name = __name__.split('.', 1)[0]
 if not os.path.exists(package_name):
     os.makedirs(package_name)

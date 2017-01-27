@@ -29,7 +29,7 @@ class Tagger:
 
         :param filepath: the absolute path of the file to check on
         :returns: the audio file containing the metadata
-        :rtype: Boolean/Class
+        :rtype: boolean/class
         """
         _, filename = filepath.rsplit('/', 1)
         _, ext = filename.rsplit('.', 1)
@@ -52,7 +52,7 @@ class Tagger:
 
         :param filepath: the absolute path of the file to check on
         :returns: the audio file containing the metadata
-        :rtype: Boolean/Class
+        :rtype: boolean/class
         """
         metadata = self.is_valid_audio_file(filepath)
         return metadata

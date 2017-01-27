@@ -23,11 +23,11 @@ DESCRIPTION = OMNITAGGER.__doc__
 with open('requirements.txt') as requirements:
     REQUIREMENTS = requirements.readlines()
 
-with open('README.md') as readme:
+with open('README.rst') as readme:
     LONG_DESCRIPTION = readme.read()
 
 setup(
-    name='OmniTagger',
+    name='omnitagger',
     version=VERSION,
     url=URL,
     download_url='{}/tarball/{}'.format(URL, VERSION),

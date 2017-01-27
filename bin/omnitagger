@@ -19,42 +19,56 @@ if __name__ == '__main__':
         '-e', '--exceptions',
         default=False,
         nargs='+',
-        help='enter full artist or file names that you don\'t want to be title cased',
+        help='Enter full artist or file names that you do not want to be title cased',
         required=False
     )
     parser.add_argument(
         '-r', '--recursive',
         action='store_true',
         default=False,
-        help='grab files recursively',
+        help='Grab files recursively',
         required=False
     )
     parser.add_argument(
         '-c', '--clear',
         action='store_true',
         default=False,
-        help='clear all existing metadata on all files before inserting new ones',
+        help='Clear all existing metadata on all files before inserting new ones',
         required=False
     )
     parser.add_argument(
         '-f', '--filetypes',
         default=False,
         nargs='+',
-        help='enter filetype(s) the script should only look for (.mp3/.flac/.ogg)',
+        help='Enter filetype(s) the script should only look for (.mp3/.flac/.ogg)',
         required=False
     )
     parser.add_argument(
-        '--remove-original',
+        '-d', '--remove-original',
         action='store_true',
         default=False,
-        help='removes the original file after running',
+        help='Removes the original file after running',
         required=False
     )
     parser.add_argument(
-        '--titlecase-articles',
+        '-t', '--titlecase-articles',
         action='store_true',
         default=False,
-        help='titlecase articles such as: a, an, and, as, that etc..',
+        help='Titlecase articles such as: a, an, and, as, that etc..',
+        required=False
+    )
+    parser.add_argument(
+        '-l', '--fingerprint-lookup',
+        action='store_true',
+        default=False,
+        help='Enable fingerprint lookup for files (much longer process)',
+        required=False
+    )
+    parser.add_argument(
+        '-s', '--skip',
+        default=[],
+        nargs='+',
+        help='Specify the files you want to skip',
         required=False
     )
 

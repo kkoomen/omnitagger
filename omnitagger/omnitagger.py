@@ -12,10 +12,12 @@ Contains the main logic for getting the files, beautify them, and log the info.
 
 import os
 import re
+import sys
 import logging
 from titlecase import titlecase
 from shutil import copyfile
 from omnitagger.metatagger import tagger
+import acoustid
 
 class OmniTagger:
 
@@ -25,6 +27,8 @@ class OmniTagger:
         self.exceptions = args.exceptions or []
         self.recursive = args.recursive
         self.titlecase_articles = args.titlecase_articles
+        self.files_to_skip = args.skip
+        self.fingerprint_lookup = args.fingerprint_lookup
         self.clear = args.clear
         self.remove_original = args.remove_original
         self.filetypes = args.filetypes or ['.mp3', '.ogg', '.flac']
@@ -42,13 +46,13 @@ class OmniTagger:
                     if filename.endswith(tuple(self.filetypes)):
                         cwd = root.replace(os.getcwd(), '')
                         dirname = cwd[1::].split('/', 1)[0]
-                        if dirname != self.destination:
+                        if dirname != self.destination and filename not in self.files_to_skip:
                             file = os.path.join(root, filename)
                             files.append(file)
         else:
-            for file in os.listdir(os.getcwd()):
-                if file.endswith(tuple(self.filetypes)):
-                    files.append(os.path.realpath(file))
+            for filename in os.listdir(os.getcwd()):
+                if filename.endswith(tuple(self.filetypes)) and filename not in self.files_to_skip:
+                    files.append(os.path.realpath(filename))
 
         if len(files) < 1:
             logging.error('No {} files found in your current directory.'.format(
@@ -125,16 +129,17 @@ class OmniTagger:
         when you download an album.
 
         :param filepath: the absolute path of the file to look for the artist.
-        :rtype: None/String
+        :rtype: none/string
         """
         artist = None
         metadata = tagger.read(filepath)
 
         if metadata and metadata['artist']:
-            artist = self.beautify(metadata['artist'])
+            artist = metadata['artist']
         else:
             _, current_dir, filename  = filepath.rsplit('/', 2)
-            question = "Unable to find artist in filename or metadata for \"{}\". "
+            question = "Unable to find artist via fingerprint, in the filename "
+            question += "and metadata for \"{}\". "
             question += "\nIs the directory name ({}) perhaps the "
             question += "exact artist name? [Y/n]: "
             question = question.format(filename, current_dir)
@@ -161,7 +166,7 @@ class OmniTagger:
         "titlecase" module itself.
 
         :param word: the word to check on
-        :rtype: None/String
+        :rtype: none/string
         """
         # Taken from
         # https://github.com/ppannuto/python-titlecase/blob/master/titlecase/__init__.py#L15
@@ -190,6 +195,31 @@ class OmniTagger:
         )
         return formatted
 
+    def get_file_fingerprint_data(self, file):
+        """
+        Lookup filedata via acoustid.
+
+        :param file: the file to lookup
+        :rtype: boolean/dictionary
+        """
+
+        # check if fingerprint_lookup is set, since the lookup can take a few
+        # milliseconds, which makes the process slow very quickly when dealing
+        # with large amount of files.
+        if not self.fingerprint_lookup:
+            return False
+
+        try:
+            results = acoustid.match('3zV9hw9Egc', file)
+        except:
+            return False
+
+        for score, rid, title, artist in results:
+            return {
+                'artist': artist,
+                'title': title,
+            }
+
     def main(self):
         """
         The main function that loops over all the files, beautifies them, adds
@@ -200,15 +230,21 @@ class OmniTagger:
             try:
                 filepath, filename = file.rsplit('/', 1)
                 valid_file = tagger.is_valid_audio_file(file)
-                if valid_file is False:
+                if  valid_file is False:
                     continue
 
                 pattern = self.get_filename_pattern()
                 regex = re.match(pattern, filename)
+                fingerprint_data = self.get_file_fingerprint_data(file)
 
-                artist = self.beautify(regex.group(1) or self.find_artist(file))
-                title = self.beautify(regex.group(2))
                 extension = regex.group(3)
+                if fingerprint_data:
+                    artist = self.beautify(fingerprint_data['artist'])
+                    title = self.beautify(fingerprint_data['title'])
+                else:
+                    artist = self.beautify(regex.group(1)) or \
+                            self.beautify(self.find_artist(file))
+                    title = self.beautify(regex.group(2))
 
                 # If we don't have an artist, we will continue.
                 if not artist:
@@ -232,7 +268,12 @@ class OmniTagger:
                 if self.remove_original:
                     os.remove(file)
 
-                logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
+                # log with a color to let the user know the file name has changed
+                if filename != dest_filename:
+                    logging.info('\033[1;31m({}/{}) {}\033[0m --> \033[1;31m{}\033[0m'.format(index+1, len(files), filename, dest_filename))
+                else:
+                    logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
+
             except AttributeError:
                 logging.error("\"{}\" does not match the pattern".format(filename))
                 continue
