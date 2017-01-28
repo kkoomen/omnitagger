@@ -20,6 +20,7 @@ __license__ = 'MIT'
 
 import logging
 import os
+import sys
 
 log_format = '[%(levelname)s] %(message)s'
 logging.basicConfig(format=log_format, level=logging.INFO)
@@ -28,5 +29,5 @@ for logger_name in ['requests']:
     logging.getLogger(logger_name).propagate = False
 
 package_name = __name__.split('.', 1)[0]
-if not os.path.exists(package_name):
+if not os.path.exists(package_name) and sys.argv[1] not in ['-h', '--help']:
     os.makedirs(package_name)
