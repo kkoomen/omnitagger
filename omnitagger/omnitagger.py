@@ -248,7 +248,6 @@ class OmniTagger:
                 regex = re.match(pattern, filename)
                 fingerprint_data = self.get_file_fingerprint_data(file)
 
-                extension = regex.group(3)
                 if fingerprint_data:
                     artist = self.beautify(fingerprint_data['artist'])
                     title = self.beautify(fingerprint_data['title'])
@@ -256,6 +255,7 @@ class OmniTagger:
                     artist = self.beautify(regex.group(1)) or \
                             self.beautify(self.find_artist(file))
                     title = self.beautify(regex.group(2))
+                extension = regex.group(3)
 
                 # If we don't have an artist, we will continue.
                 if not artist:
