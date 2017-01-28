@@ -71,54 +71,45 @@ class OmniTagger:
         """
         pattern = '^'
 
-        """
-        Check for optional digits in the first line and check for parentheses,
-        dots or dashes in the second line. We should expect the following cases
-        (where the parentheses can also be a dot or dash of course, which is
-        most common):
-
-        01)FOx sTeVENsoN - trIGgeR.mp3
-        01 ) FOx sTeVENsoN - trIGgeR.mp3
-        01) FOx sTeVENsoN - trIGgeR.mp3
-        01 )FOx sTeVENsoN - trIGgeR.mp3
-        01FOx sTeVENsoN - trIGgeR.mp3
-        """
+        # Check for optional digits in the first line and check for parentheses,
+        # dots or dashes in the second line. We should expect the following cases
+        # (where the parentheses can also be a dot or dash of course, which is
+        # most common):
+        #
+        # 01)FOx sTeVENsoN - trIGgeR.mp3
+        # 01 ) FOx sTeVENsoN - trIGgeR.mp3
+        # 01) FOx sTeVENsoN - trIGgeR.mp3
+        # 01 )FOx sTeVENsoN - trIGgeR.mp3
+        # 01FOx sTeVENsoN - trIGgeR.mp3
         pattern += '(?:[\d]+)?'
         pattern += '(?:\s*(?:\)|\.|\-)\s*)?'
 
-        """
-        The artist including the link sign. We should expect the following cases:
-
-        01 FOx sTeVENsoN - trIGgeR.mp3
-        01 FOx sTeVENsoN -trIGgeR.mp3
-        01 FOx sTeVENsoN- trIGgeR.mp3
-        01 FOx sTeVENsoN-trIGgeR.mp3
-
-        where #4 should be irrelevant. I didn't include it in the regex, since
-        we can pretty much assume that when you have a word with a link sign that
-        has no spaces on the left or right that it is one word. We assume that it
-        is an mistake only if it is a case #1, #2, or #3.
-
-        We also make it optional because if the artist is None we can grab the
-        current directory its name or read the artist in the tags if it's already
-        in there.
-        """
+        # The artist including the link sign. We should expect the following cases:
+        #
+        # 01 FOx sTeVENsoN - trIGgeR.mp3
+        # 01 FOx sTeVENsoN -trIGgeR.mp3
+        # 01 FOx sTeVENsoN- trIGgeR.mp3
+        # 01 FOx sTeVENsoN-trIGgeR.mp3
+        #
+        # where #4 should be irrelevant. I didn't include it in the regex, since
+        # we can pretty much assume that when you have a word with a link sign that
+        # has no spaces on the left or right that it is one word. We assume that it
+        # is an mistake only if it is a case #1, #2, or #3.
+        #
+        # We also make it optional because if the artist is None we can grab the
+        # current directory its name or read the artist in the tags if it's already
+        # in there.
         pattern += '(?:(.+)(?:\-\ |\ \-\ |\ \-))?'
 
-        """
-        We can assume this is the rest of the filename which will be the title
-        of the song.
-        """
+        # We can assume this is the rest of the filename which will be the title
+        # of the song.
         pattern += '(.+)'
 
-        """
-        The file extension (excluding the dot)
-        """
+        # The file extension (excluding the dot)
         pattern += '(?:\.(mp3|ogg|flac))'
 
-        """
-        String should also end with this pattern
-        """
+
+        # String should also end with this pattern
         pattern += '$'
         return pattern
 
@@ -192,8 +183,10 @@ class OmniTagger:
 
         # For e.g. ACDC we get AC/DC back from the fingerprint lookup.
         # We want that slash to be removed, else the copying part goes wrong.
-        formatted_filename = re.sub(r'\_+', ' ', filepart)
-        formatted_filename = re.sub(r'\/+', '', formatted_filename)
+        # It will then assume "AC" is the folder and "DC" is the beginning
+        # of the filename.
+        formatted_filename = re.sub(r'[\_]+', ' ', filepart)
+        formatted_filename = re.sub(r'[\/]+', '', formatted_filename)
 
         if formatted_filename.strip() not in self.exceptions:
             formatted_filename = titlecase(
@@ -229,6 +222,8 @@ class OmniTagger:
             return {
                 'artist': artist,
                 'title': title,
+                'score': int(score * 100) + '%',
+                'score_raw': score,
             }
 
     def main(self):
@@ -257,9 +252,37 @@ class OmniTagger:
                     title = self.beautify(regex.group(2))
                 extension = regex.group(3)
 
-                # If we don't have an artist, we will continue.
+                # If we don't have an artist, we will skip this file.
                 if not artist:
                     continue
+
+                # The format we get back from the fingerprint lookup:
+                # Antoine Dodson; The Gregory Brothers; Kelly Dodson - Bed Intruder Song.mp3
+                #
+                # If we have a semi-colon we know we have multiple artists.
+                # The 1st one is always the original one. The rest we append
+                # after the file name as (Ft. {artist} & {artist}) etc...
+                #
+                # We do this so the user still has their music files structured
+                # by their artist.
+                if self.fingerprint_lookup and ';' in artist:
+                    original_artist, featured_artists = artist.split(';', 1)
+                    artist = self.beautify(original_artist)
+
+                    # We can also receive the format "{artist} & {artist}", that
+                    # is why we replace that with a semi-colon.
+                    featured_artists = re.sub(r'&', ';', featured_artists)
+
+                    # Sometimes the names are already in the title. Only append
+                    # the artists that are still excluded in the title.
+                    excluded_featured_artists = [
+                        fa for fa in featured_artists.split(';') if fa.strip() not in title
+                    ]
+                    if excluded_featured_artists:
+                        excluded_featured_artists = self.beautify(
+                            ' & '.join([a for a in excluded_featured_artists if a])
+                        )
+                        title += ' (Ft. {})'.format(excluded_featured_artists)
 
                 # copy the file under its new name
                 dest_folder = os.path.join(os.getcwd(), self.destination)
@@ -281,11 +304,19 @@ class OmniTagger:
 
                 # log with a color to let the user know the file name has changed
                 if filename != dest_filename:
-                    logging.info('\033[1;31m({}/{}) {}\033[0m --> \033[1;31m{}\033[0m'.format(index+1, len(files), filename, dest_filename))
+                    logging.info(
+                        '\033[1;31m({}/{}) {}\033[0m --> \033[1;31m{}\033[0m'.format(
+                            index+1,
+                            len(files),
+                            filename,
+                            dest_filename
+                        )
+                    )
                 else:
                     logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
 
-            except AttributeError:
+            except AttributeError as e:
+                print(e)
                 logging.error("\"{}\" does not match the pattern".format(filename))
                 continue
             except KeyboardInterrupt:
