@@ -14,7 +14,6 @@ import os
 import re
 import sys
 import logging
-import subprocess
 from titlecase import titlecase
 from shutil import copyfile
 from omnitagger.metatagger import tagger
