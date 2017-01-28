@@ -29,5 +29,8 @@ for logger_name in ['requests']:
     logging.getLogger(logger_name).propagate = False
 
 package_name = __name__.split('.', 1)[0]
-if not os.path.exists(package_name) and sys.argv[1] not in ['-h', '--help']:
-    os.makedirs(package_name)
+if not os.path.exists(package_name):
+    if len(sys.argv) > 1 and sys.argv[1] in ['-h', '--help']:
+        pass
+    else:
+        os.makedirs(package_name)
