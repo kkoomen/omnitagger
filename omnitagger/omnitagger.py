@@ -14,6 +14,7 @@ import os
 import re
 import sys
 import logging
+import subprocess
 from titlecase import titlecase
 from shutil import copyfile
 from omnitagger.metatagger import tagger
@@ -138,10 +139,10 @@ class OmniTagger:
             artist = metadata['artist']
         else:
             _, current_dir, filename  = filepath.rsplit('/', 2)
-            question = "Unable to find artist via fingerprint, filename "
-            question += "or metadata for \"{}\". "
-            question += "\nIs the directory name ({}) perhaps the "
-            question += "exact artist name? [Y/n]: "
+            question = (
+                "Unable to find artist via filename or metadata for \"{}\". \n"
+                "Is the directory name ({}) perhaps the exact artist name? [Y/n]: "
+            )
             question = question.format(filename, current_dir)
             answer = input(question)
             while not answer or answer.lower() not in 'yn':
@@ -149,13 +150,13 @@ class OmniTagger:
 
             if answer.lower() == 'n':
                 artist = input("Enter a new artist name: ")
-            if answer == 'y':
+            elif answer == 'y':
                 artist = current_dir
 
         if not artist:
-            logging.error('Unable to find artist for file "{}", skipping.'.format(
-                filename
-            ))
+            logging.error(
+                'Unable to find artist for file "{}", skipping.'.format(filename)
+            )
         return artist
 
     def titlecase_handler(self, word, **kwargs):
@@ -187,11 +188,19 @@ class OmniTagger:
         elif isinstance(filepart, list):
             filepart = filepart[0]
 
-        if filepart.strip() not in self.exceptions:
-            filepart = titlecase(filepart.lower(), callback=self.titlecase_handler)
+        # For e.g. ACDC we get AC/DC back from the fingerprint lookup.
+        # We want that slash to be removed, else the copying part goes wrong.
+        formatted_filename = re.sub(r'\_+', ' ', filepart)
+        formatted_filename = re.sub(r'\/+', '', formatted_filename)
+
+        if formatted_filename.strip() not in self.exceptions:
+            formatted_filename = titlecase(
+                formatted_filename.lower(),
+                callback=self.titlecase_handler
+            )
 
         formatted = ' '.join(
-            [w for w in re.sub(r'\_+', ' ', filepart).split(' ') if w]
+            [w for w in formatted_filename.split(' ') if w]
         )
         return formatted
 
