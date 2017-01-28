@@ -65,10 +65,17 @@ if __name__ == '__main__':
         required=False
     )
     parser.add_argument(
-        '-s', '--skip',
+        '-i', '--ignore',
         default=[],
         nargs='+',
-        help='Specify the files you want to skip',
+        help='Specify the files you want omnitagger to ignore completely',
+        required=False
+    )
+    parser.add_argument(
+        '-s', '--skip-beautifying',
+        action='store_true',
+        default=False,
+        help='If your files are already correct, omnitagger wil not beautify them',
         required=False
     )
 

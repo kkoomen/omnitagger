@@ -27,7 +27,8 @@ class OmniTagger:
         self.exceptions = args.exceptions or []
         self.recursive = args.recursive
         self.titlecase_articles = args.titlecase_articles
-        self.files_to_skip = args.skip
+        self.ignored_files = args.ignore
+        self.skip_beautifying = args.skip_beautifying
         self.fingerprint_lookup = args.fingerprint_lookup
         self.clear = args.clear
         self.remove_original = args.remove_original
@@ -46,12 +47,12 @@ class OmniTagger:
                     if filename.endswith(tuple(self.filetypes)):
                         cwd = root.replace(os.getcwd(), '')
                         dirname = cwd[1::].split('/', 1)[0]
-                        if dirname != self.destination and filename not in self.files_to_skip:
+                        if dirname != self.destination and filename not in self.ignored_files:
                             file = os.path.join(root, filename)
                             files.append(file)
         else:
             for filename in os.listdir(os.getcwd()):
-                if filename.endswith(tuple(self.filetypes)) and filename not in self.files_to_skip:
+                if filename.endswith(tuple(self.filetypes)) and filename not in self.ignored_files:
                     files.append(os.path.realpath(filename))
 
         if len(files) < 1:
@@ -184,6 +185,8 @@ class OmniTagger:
         """
         if not filepart:
             return False
+        elif self.skip_beautifying:
+            return filepart.strip()
         elif isinstance(filepart, list):
             filepart = filepart[0]
 
