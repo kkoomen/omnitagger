@@ -1,6 +1,6 @@
 # omnitagger
 
-[![Package Version](https://img.shields.io/pypi/v/omnitagger.svg)](https://pypi.python.org/koomen/omnitagger/)
+[![Package Version](https://img.shields.io/pypi/v/omnitagger.svg)](https://pypi.python.org/pypi/omnitagger)
 [![Code Climate](https://codeclimate.com/github/muts/omnitagger/badges/gpa.svg)](https://codeclimate.com/github/muts/omnitagger)
 
 Omnitagger is a CLI tool for beautifying your music files and adding metadata
