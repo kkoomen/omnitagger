@@ -1,8 +1,6 @@
 omnitagger
 ==========
 
-Soon available via pypi.
-
 Omnitagger is a CLI tool for beautifying your music files and adding
 metadata automatically to your files. It provides fingerprint lookup via
 `acoustid <https://github.com/beetbox/pyacoustid>`__. Wether this is

@@ -6,10 +6,6 @@
 #
 # Distributed under terms of the MIT license.
 
-"""
-TODO
-"""
-
 from omnitagger.omnitagger import OmniTagger
 import argparse
 

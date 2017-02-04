@@ -215,22 +215,18 @@ class OmniTagger:
 
         try:
             results = acoustid.match('3zV9hw9Egc', file)
-        except:
+        except Exception as e:
             return False
 
         for score, rid, title, artist in results:
             return {
                 'artist': artist,
                 'title': title,
-                'score': int(score * 100) + '%',
+                'score': '{}%'.format(int(score * 100)),
                 'score_raw': score,
             }
 
     def main(self):
-        """
-        The main function that loops over all the files, beautifies them, adds
-        metadata and copies them to their new location.
-        """
         files = self.get_files()
         for index,file in enumerate(files):
             try:
@@ -316,9 +312,8 @@ class OmniTagger:
                     logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
 
             except AttributeError as e:
-                print(e)
                 logging.error("\"{}\" does not match the pattern".format(filename))
                 continue
-            except KeyboardInterrupt:
+            except Exception as e:
                 logging.error('Quitting {}'.format(self.package_name))
                 exit(1)

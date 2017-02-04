@@ -7,14 +7,14 @@
 # Distributed under terms of the MIT license.
 
 """
-A CLI that beautifies your (old) music files and automatically adds metatags
-based on the filename and metadata.
+A CLI that beautifies your (old) music files, automatically adds metatags
+based on fingerprinting, filename and metadata.
 """
 
-__version__ = '0.0.1'
+__version__ = '2.0.0'
 __author__ = 'Kim Koomen'
 __email__ = 'koomen@protonmail.com'
-__url__ = 'https://github.com/muts/omni-tagger'
+__url__ = 'https://github.com/muts/omnitagger'
 __license__ = 'MIT'
 
 
