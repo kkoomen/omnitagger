@@ -23,9 +23,7 @@ one. For more information on how omnitagger works, visit the
 [How it works](https://github.com/muts/omnitagger/wiki/How-it-works) page on the wiki.
 
 # Installation
-- `$ git clone https://github.com/muts/omnitagger`
-- `$ cd omnitagger`
-- `$ ./setup.py install`
+- `$ pip install omnitagger`
 
 # Documentation
 Visit the [documentation](https://github.com/muts/omnitagger/wiki/Documentation)
