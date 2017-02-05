@@ -112,6 +112,16 @@ class OmniTagger:
             "Is the directory name ({}) perhaps the exact artist name? [Y/n]: "
         )
 
+    def _prompt_user_for_artist(self):
+        while not answer or answer.lower() not in 'yn':
+            answer = input('Please enter Y or n. ')
+
+        if answer.lower() == 'n':
+            artist = input("Enter a new artist name: ")
+        elif answer == 'y':
+            artist = current_dir
+        return artist
+
     def find_artist(self, filepath):
         """
         If we don't have an artist, then check if it is in the
@@ -132,19 +142,7 @@ class OmniTagger:
         question = self._get_find_artist_error_question()
         question = question.format(filename, current_dir)
         answer = input(question)
-        while not answer or answer.lower() not in 'yn':
-            answer = input('Please enter Y or n. ')
-
-        if answer.lower() == 'n':
-            artist = input("Enter a new artist name: ")
-        elif answer == 'y':
-            artist = current_dir
-
-        if not artist:
-            logging.error(
-                'Unable to find artist for file "{}", skipping.'.format(filename)
-            )
-        return artist
+        return self._prompt_user_for_artist()
 
     def titlecase_handler(self, word, **kwargs):
         """
@@ -246,6 +244,7 @@ class OmniTagger:
 
                 # If we don't have an artist, we will skip this file.
                 if not artist:
+                    logging.error('Unable to find artist for file "{}", skipping.'.format(filename))
                     continue
 
                 # The format we get back from the fingerprint lookup:
