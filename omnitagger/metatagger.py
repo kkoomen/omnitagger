@@ -57,6 +57,44 @@ class Tagger:
         metadata = self.is_valid_audio_file(filepath)
         return metadata
 
+    def _write_mp3_metatags(self, file, **kwargs):
+        audio = MP3(file['filename'], ID3=EasyID3)
+        try:
+            audio.add_tags(ID3=EasyID3)
+        except (mutagen.id3.error, KeyError) as e:
+            pass
+
+        if kwargs['clear']:
+            audio.clear()
+        audio['title'] = file['title']
+        audio['artist'] = file['artist']
+        audio.save()
+        audio.save(v1=2, v2_version=3)
+
+    def _write_ogg_metatags(self, file, **kwargs):
+        try:
+            audio = OggVorbis(file['filename'])
+        except (OggVorbisHeaderError, KeyError):
+            audio = OggVorbis()
+
+        if kwargs['clear']:
+            audio.clear()
+        audio['title'] = file['title']
+        audio['artist'] = file['artist']
+        audio['ALBUMARTIST'] = file['artist']
+        audio.save(file['filename'])
+
+    def _write_flac_metatags(self, file, **kwargs):
+        try:
+            audio = FLAC(file['filename'])
+        except (FLACNoHeaderError, KeyError):
+            audio = FLAC()
+
+        if kwargs['clear']:
+            audio.clear()
+        audio['TITLE'] = file['title']
+        audio['ARTIST'] = file['artist']
+        audio.save(file['filename'])
 
     def write(self, file, **kwargs):
         """
@@ -66,40 +104,10 @@ class Tagger:
         """
 
         if file['extension'] == 'mp3':
-            audio = MP3(file['filename'], ID3=EasyID3)
-            try:
-                audio.add_tags(ID3=EasyID3)
-            except (mutagen.id3.error, KeyError) as e:
-                pass
-
-            if kwargs['clear']:
-                audio.clear()
-            audio['title'] = file['title']
-            audio['artist'] = file['artist']
-            audio.save()
-            audio.save(v1=2, v2_version=3)
+            self._write_mp3_metatags(file, **kwargs)
         elif file['extension'] == 'flac':
-            try:
-                audio = FLAC(file['filename'])
-            except (FLACNoHeaderError, KeyError):
-                audio = FLAC()
-
-            if kwargs['clear']:
-                audio.clear()
-            audio['TITLE'] = file['title']
-            audio['ARTIST'] = file['artist']
-            audio.save(file['filename'])
+            self._write_flac_metatags(file, **kwargs)
         elif file['extension'] == 'ogg':
-            try:
-                audio = OggVorbis(file['filename'])
-            except (OggVorbisHeaderError, KeyError):
-                audio = OggVorbis()
-
-            if kwargs['clear']:
-                audio.clear()
-            audio['title'] = file['artist']
-            audio['artist'] = file['artist']
-            audio['ALBUMARTIST'] = file['artist']
-            audio.save(file['filename'])
+            self._write_ogg_metatags(file, **kwargs)
 
 tagger = Tagger()
