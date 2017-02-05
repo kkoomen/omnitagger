@@ -265,7 +265,6 @@ class OmniTagger:
                 artist=fingerprint_data['artist'],
                 title=fingerprint_data['title']
             )
-            print('artist: {}, title: {}'.format(artist, title))
         else:
             artist = self.beautify(regex.group(1)) or self.beautify(self.find_artist(file))
             title = self.beautify(regex.group(2))
