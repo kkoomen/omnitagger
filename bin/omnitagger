@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-e', '--exceptions',
-        default=False,
+        default=[],
         nargs='+',
         help='Enter full artist or file names that you do not want to be title cased',
         required=False
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-f', '--filetypes',
-        default=False,
+        default=['.mp3', '.ogg', '.flac'],
         nargs='+',
         help='Enter filetype(s) the script should only look for (.mp3/.flac/.ogg)',
         required=False
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         required=False
     )
     parser.add_argument(
-        '-i', '--ignore',
+        '-i', '--ignore-files',
         default=[],
         nargs='+',
         help='Specify the files you want omnitagger to ignore completely',
