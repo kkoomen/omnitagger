@@ -144,7 +144,7 @@ class OmniTagger:
         answer = input(question)
         return self._prompt_user_for_artist()
 
-    def titlecase_handler(self, word, **kwargs):
+    def _titlecase_handler(self, word, **kwargs):
         """
         This function gets called for every word that is being titlecased.
         We will titlecase articles if the user adds the flag.
@@ -185,7 +185,7 @@ class OmniTagger:
         if formatted_filename.strip() not in self.exceptions:
             formatted_filename = titlecase(
                 formatted_filename.lower(),
-                callback=self.titlecase_handler
+                callback=self._titlecase_handler
             )
 
         formatted = ' '.join(
@@ -220,95 +220,98 @@ class OmniTagger:
                 'score_raw': score,
             }
 
+    def _format_fingerprint_data(self, **kwargs):
+        artist = kwargs['artist']
+        title = kwargs['title']
+
+        # The format we get back from the fingerprint lookup:
+        # Antoine Dodson; The Gregory Brothers; Kelly Dodson - Bed Intruder Song.mp3
+        #
+        # If we have a semi-colon we know we have multiple artists.
+        # The 1st one is always the original one. The rest we append
+        # after the file name as (Ft. {artist} & {artist}) etc...
+        #
+        # We do this so the user still has their music files structured
+        # by their artist.
+        if self.fingerprint_lookup and ';' in artist:
+            original_artist, featured_artists = artist.split(';', 1)
+            artist = self.beautify(original_artist)
+
+            # We can also receive the format "{artist} & {artist}", that
+            # is why we replace that with a semi-colon.
+            featured_artists = re.sub(r'&', ';', featured_artists)
+
+            # Sometimes the names are already in the title. Only append
+            # the artists that are still excluded in the title.
+            excluded_featured_artists = [
+                fa for fa in featured_artists.split(';') if fa.strip() not in title
+            ]
+            if excluded_featured_artists:
+                excluded_featured_artists = ' & '.join(
+                    [a for a in excluded_featured_artists if a]
+                )
+                title += ' (Ft. {})'.format(excluded_featured_artists)
+
+        return [self.beautify(artist), self.beautify(title)]
+
+    def _get_file_data(self, file):
+        filepath, filename = file.rsplit('/', 1)
+        pattern = self.get_filename_pattern()
+        regex = re.match(pattern, filename)
+        fingerprint_data = self.get_file_fingerprint_data(file)
+
+        if fingerprint_data:
+            artist, title = self._format_fingerprint_data(
+                artist=fingerprint_data['artist'],
+                title=fingerprint_data['title']
+            )
+            print('artist: {}, title: {}'.format(artist, title))
+        else:
+            artist = self.beautify(regex.group(1)) or self.beautify(self.find_artist(file))
+            title = self.beautify(regex.group(2))
+
+        extension = regex.group(3)
+        return [artist, title, extension]
+
     def main(self):
         files = self.get_files()
         for index,file in enumerate(files):
-            try:
-                filepath, filename = file.rsplit('/', 1)
-                valid_file = tagger.is_valid_audio_file(file)
-                if  valid_file is False:
-                    continue
-
-                pattern = self.get_filename_pattern()
-                regex = re.match(pattern, filename)
-                fingerprint_data = self.get_file_fingerprint_data(file)
-
-                if fingerprint_data:
-                    artist = self.beautify(fingerprint_data['artist'])
-                    title = self.beautify(fingerprint_data['title'])
-                else:
-                    artist = self.beautify(regex.group(1)) or \
-                            self.beautify(self.find_artist(file))
-                    title = self.beautify(regex.group(2))
-                extension = regex.group(3)
-
-                # If we don't have an artist, we will skip this file.
-                if not artist:
-                    logging.error('Unable to find artist for file "{}", skipping.'.format(filename))
-                    continue
-
-                # The format we get back from the fingerprint lookup:
-                # Antoine Dodson; The Gregory Brothers; Kelly Dodson - Bed Intruder Song.mp3
-                #
-                # If we have a semi-colon we know we have multiple artists.
-                # The 1st one is always the original one. The rest we append
-                # after the file name as (Ft. {artist} & {artist}) etc...
-                #
-                # We do this so the user still has their music files structured
-                # by their artist.
-                if self.fingerprint_lookup and ';' in artist:
-                    original_artist, featured_artists = artist.split(';', 1)
-                    artist = self.beautify(original_artist)
-
-                    # We can also receive the format "{artist} & {artist}", that
-                    # is why we replace that with a semi-colon.
-                    featured_artists = re.sub(r'&', ';', featured_artists)
-
-                    # Sometimes the names are already in the title. Only append
-                    # the artists that are still excluded in the title.
-                    excluded_featured_artists = [
-                        fa for fa in featured_artists.split(';') if fa.strip() not in title
-                    ]
-                    if excluded_featured_artists:
-                        excluded_featured_artists = self.beautify(
-                            ' & '.join([a for a in excluded_featured_artists if a])
-                        )
-                        title += ' (Ft. {})'.format(excluded_featured_artists)
-
-                # copy the file under its new name
-                dest_folder = os.path.join(os.getcwd(), self.destination)
-                dest_filename = '{} - {}.{}'.format(artist, title, extension)
-                dest_file = '{}/{}'.format(dest_folder, dest_filename)
-                copyfile(file, dest_file)
-
-                # write the metadata to the new file
-                filedata = {
-                    'filename': dest_file,
-                    'artist': artist,
-                    'title': title,
-                    'extension': extension
-                }
-                tagger.write(filedata, clear=self.clear)
-
-                if self.remove_original:
-                    os.remove(file)
-
-                # log with a color to let the user know the file name has changed
-                if filename != dest_filename:
-                    logging.info(
-                        '\033[1;31m({}/{}) {}\033[0m --> \033[1;31m{}\033[0m'.format(
-                            index+1,
-                            len(files),
-                            filename,
-                            dest_filename
-                        )
-                    )
-                else:
-                    logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
-
-            except AttributeError as e:
-                logging.error("\"{}\" does not match the pattern".format(filename))
+            filepath, filename = file.rsplit('/', 1)
+            valid_file = tagger.is_valid_audio_file(file)
+            if  valid_file is False:
                 continue
-            except Exception as e:
-                logging.error('Quitting {}'.format(self.package_name))
-                exit(1)
+
+            artist, title, extension = self._get_file_data(file)
+
+            # If we don't have an artist, we will skip this file.
+            if not artist:
+                logging.error('Unable to find artist for file "{}", skipping.'.format(filename))
+                continue
+
+            # copy the file under its new name
+            dest_folder = os.path.join(os.getcwd(), self.destination)
+            dest_filename = '{} - {}.{}'.format(artist, title, extension)
+            dest_file = '{}/{}'.format(dest_folder, dest_filename)
+            copyfile(file, dest_file)
+
+            # write the metadata to the new file
+            filedata = {
+                'filename': dest_file,
+                'artist': artist,
+                'title': title,
+                'extension': extension
+            }
+            tagger.write(filedata, clear=self.clear)
+
+            if self.remove_original:
+                os.remove(file)
+
+            # log with a color to let the user know the file name has changed
+            if filename != dest_filename:
+                logging.info(
+                    '\033[1;31m({}/{}) {}\033[0m --> \033[1;31m{}\033[0m'.format(
+                        index+1, len(files), filename, dest_filename
+                    )
+                )
+            else:
+                logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
