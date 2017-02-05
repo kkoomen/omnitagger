@@ -106,6 +106,12 @@ class OmniTagger:
         pattern += '$'
         return pattern
 
+    def _get_find_artist_error_question(self):
+        return (
+            "Unable to find artist via filename or metadata for \"{}\". \n"
+            "Is the directory name ({}) perhaps the exact artist name? [Y/n]: "
+        )
+
     def find_artist(self, filepath):
         """
         If we don't have an artist, then check if it is in the
@@ -120,22 +126,19 @@ class OmniTagger:
         metadata = tagger.read(filepath)
 
         if metadata and metadata['artist']:
-            artist = metadata['artist']
-        else:
-            _, current_dir, filename  = filepath.rsplit('/', 2)
-            question = (
-                "Unable to find artist via filename or metadata for \"{}\". \n"
-                "Is the directory name ({}) perhaps the exact artist name? [Y/n]: "
-            )
-            question = question.format(filename, current_dir)
-            answer = input(question)
-            while not answer or answer.lower() not in 'yn':
-                answer = input('Please enter Y or n. ')
+            return metadata['artist']
 
-            if answer.lower() == 'n':
-                artist = input("Enter a new artist name: ")
-            elif answer == 'y':
-                artist = current_dir
+        _, current_dir, filename  = filepath.rsplit('/', 2)
+        question = self._get_find_artist_error_question()
+        question = question.format(filename, current_dir)
+        answer = input(question)
+        while not answer or answer.lower() not in 'yn':
+            answer = input('Please enter Y or n. ')
+
+        if answer.lower() == 'n':
+            artist = input("Enter a new artist name: ")
+        elif answer == 'y':
+            artist = current_dir
 
         if not artist:
             logging.error(
