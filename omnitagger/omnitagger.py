@@ -179,12 +179,15 @@ class OmniTagger:
         # We want that slash to be removed, else the copying part goes wrong.
         # It will then assume "AC" is the folder and "DC" is the beginning
         # of the filename.
+        #
+        # Also replace ’ with a normal apostrophe, since that's the "normal" way.
         formatted_filename = re.sub(r'[\_]+', ' ', filepart)
         formatted_filename = re.sub(r'[\/]+', '', formatted_filename)
+        formatted_filename = re.sub(r'[’]+', '\'', formatted_filename)
 
         if formatted_filename.strip() not in self.exceptions:
             formatted_filename = titlecase(
-                formatted_filename.lower(),
+                formatted_filename,
                 callback=self._titlecase_handler
             )
 
