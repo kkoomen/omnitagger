@@ -213,12 +213,13 @@ class OmniTagger:
             return False
 
         for score, rid, title, artist in results:
-            return {
+            result = {
                 'artist': artist,
                 'title': title,
                 'score': '{}%'.format(int(score * 100)),
                 'score_raw': score,
             }
+            return result if artist and title else False
 
     def _format_fingerprint_data(self, **kwargs):
         artist = kwargs['artist']
