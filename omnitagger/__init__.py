@@ -11,7 +11,7 @@ A CLI that beautifies your (old) music files, automatically adds metatags
 based on fingerprinting, filename and metadata.
 """
 
-__version__ = '2.0.7'
+__version__ = '2.0.8'
 __author__ = 'Kim Koomen'
 __email__ = 'koomen@protonmail.com'
 __url__ = 'https://github.com/muts/omnitagger'
