@@ -65,7 +65,7 @@ class Tagger:
             pass
 
         if kwargs['clear']:
-            audio.clear()
+            audio.delete()
         audio['title'] = file['title']
         audio['artist'] = file['artist']
         audio.save()
@@ -78,7 +78,7 @@ class Tagger:
             audio = OggVorbis()
 
         if kwargs['clear']:
-            audio.clear()
+            audio.delete()
         audio['title'] = file['title']
         audio['artist'] = file['artist']
         audio['ALBUMARTIST'] = file['artist']
@@ -91,7 +91,7 @@ class Tagger:
             audio = FLAC()
 
         if kwargs['clear']:
-            audio.clear()
+            audio.delete()
         audio['TITLE'] = file['title']
         audio['ARTIST'] = file['artist']
         audio.save(file['filename'])
