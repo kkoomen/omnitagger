@@ -19,13 +19,13 @@ case that when you download an album, the structure is:
 
 If that isn't an options either, it will skip the file and continue to
 the next one. For more information on how omnitagger works, visit the
-`How it works <https://github.com/muts/omnitagger/wiki/How-it-works>`__
+`How it works <https://github.com/kkoomen/omnitagger/wiki/How-it-works>`__
 page on the wiki.
 
 Installation
 ============
 
--  ``$ git clone https://github.com/muts/omnitagger``
+-  ``$ git clone https://github.com/kkoomen/omnitagger``
 -  ``$ cd omnitagger``
 -  ``$ ./setup.py install``
 
@@ -33,7 +33,7 @@ Documentation
 =============
 
 Visit the
-`documentation <https://github.com/muts/omnitagger/wiki/Documentation>`__
+`documentation <https://github.com/kkoomen/omnitagger/wiki/Documentation>`__
 on the wiki for further details on how to use omnitagger.
 
 The purpose of omnitagger

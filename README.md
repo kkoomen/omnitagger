@@ -1,7 +1,7 @@
 # omnitagger
 
 [![Package Version](https://img.shields.io/pypi/v/omnitagger.svg)](https://pypi.python.org/pypi/omnitagger)
-[![Code Climate](https://codeclimate.com/github/muts/omnitagger/badges/gpa.svg)](https://codeclimate.com/github/muts/omnitagger)
+[![Code Climate](https://codeclimate.com/github/kkoomen/omnitagger/badges/gpa.svg)](https://codeclimate.com/github/kkoomen/omnitagger)
 
 Omnitagger is a CLI tool for beautifying your music files and adding metadata
 automatically to your files. It provides fingerprint lookup via
@@ -20,13 +20,13 @@ artist-name/
 
 If that isn't an options either, it will skip the file and continue to the next
 one. For more information on how omnitagger works, visit the
-[How it works](https://github.com/muts/omnitagger/wiki/How-it-works) page on the wiki.
+[How it works](https://github.com/kkoomen/omnitagger/wiki/How-it-works) page on the wiki.
 
 # Installation
 - `$ pip install omnitagger`
 
 # Documentation
-Visit the [documentation](https://github.com/muts/omnitagger/wiki/Documentation)
+Visit the [documentation](https://github.com/kkoomen/omnitagger/wiki/Documentation)
 on the wiki for further details on how to use omnitagger.
 
 # The purpose of omnitagger
