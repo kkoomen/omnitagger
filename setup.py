@@ -30,7 +30,7 @@ setup(
     name='omnitagger',
     version=VERSION,
     url=URL,
-    download_url='{}/tarball/{}'.format(URL, VERSION),
+    #download_url='{}/tarball/{}'.format(URL, VERSION),
     long_description=LONG_DESCRIPTION,
     description=DESCRIPTION,
     author=AUTHOR,
