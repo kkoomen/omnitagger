@@ -112,9 +112,9 @@ class OmniTagger:
             "Is the directory name ({}) perhaps the exact artist name? [Y/n]: "
         )
 
-    def _prompt_user_for_artist(self):
+    def _prompt_user_for_artist(self, answer):
         while not answer or answer.lower() not in 'yn':
-            answer = input('Please enter Y or n. ')
+            answer = input('Please enter Y or n: ')
 
         if answer.lower() == 'n':
             artist = input("Enter a new artist name: ")
@@ -142,7 +142,7 @@ class OmniTagger:
         question = self._get_find_artist_error_question()
         question = question.format(filename, current_dir)
         answer = input(question)
-        return self._prompt_user_for_artist()
+        return self._prompt_user_for_artist(answer)
 
     def _titlecase_handler(self, word, **kwargs):
         """
