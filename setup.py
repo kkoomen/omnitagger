@@ -23,7 +23,7 @@ DESCRIPTION = OMNITAGGER.__doc__
 with open('requirements.txt') as requirements:
     REQUIREMENTS = requirements.readlines()
 
-with open('README.rst') as readme:
+with open('README.md') as readme:
     LONG_DESCRIPTION = readme.read()
 
 setup(
@@ -55,5 +55,6 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ]
 )

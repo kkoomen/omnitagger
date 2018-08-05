@@ -11,7 +11,7 @@ A CLI that beautifies your (old) music files, automatically adds metatags
 based on fingerprinting, filename and metadata.
 """
 
-__version__ = '2.1.0'
+__version__ = '2.1.3'
 __author__ = 'Kim Koomen'
 __email__ = 'koomen@protonmail.com'
 __url__ = 'https://github.com/kkoomen/omnitagger'
@@ -28,6 +28,10 @@ logging.basicConfig(format=log_format, level=logging.INFO)
 for logger_name in ['requests']:
     logging.getLogger(logger_name).propagate = False
 
+"""
+Create a folder 'omnitagger' in the currently directory before actually running
+the application. In this folder we will store all our converted music.
+"""
 package_name = __name__.split('.', 1)[0]
 if not os.path.exists(package_name):
     if len(sys.argv) > 1 and sys.argv[1] in ['-h', '--help']:

@@ -65,9 +65,9 @@ class OmniTagger:
         pattern = '^'
 
         # Check for optional digits in the first line and check for parentheses,
-        # dots or dashes in the second line. We should expect the following cases
-        # (where the parentheses can also be a dot or dash of course, which is
-        # most common):
+        # dots or dashes in the second line. We should expect the following
+        # cases (where the parentheses can also be a dot or dash of course,
+        # which is most common):
         #
         # 01)FOx sTeVENsoN - trIGgeR.mp3
         # 01 ) FOx sTeVENsoN - trIGgeR.mp3
@@ -100,7 +100,6 @@ class OmniTagger:
 
         # The file extension (excluding the dot)
         pattern += '(?:\.(mp3|ogg|flac))'
-
 
         # String should also end with this pattern
         pattern += '$'
@@ -213,6 +212,7 @@ class OmniTagger:
         try:
             results = acoustid.match('3zV9hw9Egc', file)
         except Exception as e:
+            logging.error('Could not do a fingerprint lookup\n{}'.format(e))
             return False
 
         for score, rid, title, artist in results:
@@ -274,7 +274,7 @@ class OmniTagger:
             title = self.beautify(regex.group(2))
 
         extension = regex.group(3)
-        return [artist, title, extension]
+        return [artist, title, extension, fingerprint_data['score']]
 
     def main(self):
         files = self.get_files()
@@ -284,7 +284,7 @@ class OmniTagger:
             if  valid_file is False:
                 continue
 
-            artist, title, extension = self._get_file_data(file)
+            artist, title, extension, score = self._get_file_data(file)
 
             # If we don't have an artist, we will skip this file.
             if not artist:
@@ -313,8 +313,11 @@ class OmniTagger:
             if filename != dest_filename:
                 logging.info(
                     '\033[1;31m({}/{}) {}\033[0m --> \033[1;31m{}\033[0m'.format(
-                        index+1, len(files), filename, dest_filename
+                        index + 1,
+                        len(files),
+                        filename,
+                        dest_filename
                     )
                 )
             else:
-                logging.info('({}/{}) {}'.format(index+1, len(files), dest_filename))
+                logging.info('({}/{}) {}'.format(index + 1, len(files), dest_filename))

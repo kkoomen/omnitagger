@@ -7,9 +7,15 @@
 # Distributed under terms of the MIT license.
 
 from omnitagger.omnitagger import OmniTagger
+from omnitagger import __version__
 import argparse
+import sys
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] in ['-v', '--version']:
+        print('{}'.format(__version__))
+        sys.exit(0)
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-e', '--exceptions',
