@@ -262,9 +262,11 @@ class OmniTagger:
         filepath, filename = file.rsplit('/', 1)
         pattern = self.get_filename_pattern()
         regex = re.match(pattern, filename)
+        score = False
         fingerprint_data = self.get_file_fingerprint_data(file)
 
         if fingerprint_data:
+            score = fingerprint_data['score']
             artist, title = self._format_fingerprint_data(
                 artist=fingerprint_data['artist'],
                 title=fingerprint_data['title']
@@ -274,7 +276,7 @@ class OmniTagger:
             title = self.beautify(regex.group(2))
 
         extension = regex.group(3)
-        return [artist, title, extension, fingerprint_data['score']]
+        return [artist, title, extension, score]
 
     def main(self):
         files = self.get_files()
