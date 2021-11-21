@@ -62,6 +62,10 @@ class OmniTagger:
 
         :rtype: string
         """
+        if self.skip_beautifying:
+            # Just return a pattern that splits the format: `artist - title.mp3`
+            # into three grousp: artist, title, extension.
+            return '^(.+)(?:\-\ |\ \-\ |\ \-)(.+)(?:\.(mp3|ogg|flac))$'
         pattern = '^'
 
         # Check for optional digits in the first line and check for parentheses,
